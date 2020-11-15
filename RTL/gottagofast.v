@@ -22,7 +22,7 @@ Inspired by mkl's mem68k
 `define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
 //`define cdtv      // Uncomment to build CDTV compatible version
 //`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
-//`define rev_b
+`define rev_b
 
 module gottagofast(
     input CLK,
@@ -64,6 +64,7 @@ localparam [15:0] serial  = 16'd420;
 reg autoconfig_cycle;
 reg shutup = 0;
 reg configured;
+reg cdtv_configured;
 reg [2:0] autoconfig_state;
 reg [3:0] data_out;
 
@@ -113,7 +114,11 @@ begin
   if (!reset) begin
     autoconfig_cycle = 1'b0;
   end else begin
+`ifdef cdtv
+    autoconfig_cycle = (ADDR[23:16] == 8'hE8) & !ASn & !CFGINn & !shutup & cdtv_configured;
+`else
     autoconfig_cycle = (ADDR[23:16] == 8'hE8) & !ASn & !CFGINn & !shutup;
+`endif
   end
 end
 
@@ -231,7 +236,7 @@ assign RASn  = !(access_ras | (refresh_ras & refresh_cas));
 assign UCASn = !((access_ucas) | refresh_cas);
 assign LCASn = !((access_lcas) | refresh_cas);
 `ifdef rev_b  // On Rev B OEn drives the buffers
-assign OEn   = !access_ras;
+assign OEn   = !ram_cycle;
 `else
 assign OEn   = !(RWn & access_ras);
 `endif
@@ -281,11 +286,7 @@ begin
       ((ADDR[23:20] == 4'h7) & addr_match[5]) |
       ((ADDR[23:20] == 4'h8) & addr_match[6]) |
       ((ADDR[23:20] == 4'h9) & addr_match[7])
-`ifdef cdtv
-      ) & !ASn & configured & cdtv_configured;
-`else
       ) & !ASn & configured;
-`endif
 `else
     ram_cycle = ((ADDR[23:20] >= 4'h2) & (ADDR[23:20] <= 4'h9) & !ASn);
 `endif
