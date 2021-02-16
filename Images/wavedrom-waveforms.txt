@@ -1,0 +1,36 @@
+# Used on wavedrom.com to generate timing diagrams
+
+{signal: [
+  {name: 'State', wave: 'xx=========x', period: 0.5, data: "0 1 2 3 4 5 6 7 0",},
+  {name: 'CLK', wave: 'P.....',},
+  {name: 'ADDR', wave: 'xxx=......xx', period: 0.5, data: "Match"},
+  {name: 'AS', wave: '1...0....1..', period:0.5},
+  {name: 'DS', wave: '1...0....1..', period:0.5},
+  {name: 'RW', wave: '0.1.........', period:0.5},
+  {name: 'BUFFER_OE', wave: '1....0...1..', period:0.5},
+  {name: 'WR', wave: '1...........', period:0.5},
+  {name: 'DATA', wave: 'x.......=.x.', period:0.5},
+  {name: 'MADDR', wave: 'x...=..=..xx',period:0.5, data: "Row Column"},
+  {name: 'RAS', wave: '1...010...1.',period:0.5},
+  {name: 'CAS', wave: '1..0.1..0.1.',period:0.5},
+],
+  head:{text:'Read Cycle', tock: 0,},
+ config: {hscale: 2}}
+
+
+{signal: [
+  {name: 'State', wave: 'xx=========x', period: 0.5, data: "0 1 2 3 4 5 6 7 0",},
+  {name: 'CLK', wave: 'P.....',},
+  {name: 'ADDR', wave: 'xxx=......xx', period: 0.5, data: "Match"},
+  {name: 'AS', wave: '1...0....1..', period:0.5},
+  {name: 'DS', wave: '1.....0..1..', period:0.5},
+  {name: 'RW', wave: '1.0.........', period:0.5},
+  {name: 'BUFFER_OE', wave: '1.....0..1..', period:0.5},
+  {name: 'WR', wave: '1.....0..1..', period:0.5},
+  {name: 'DATA', wave: 'x....=....xx', period:0.5},
+  {name: 'MADDR', wave: 'x...=..=..xx',period:0.5, data: "Row Column"},
+  {name: 'RAS', wave: '1...010...1.',period:0.5},
+  {name: 'CAS', wave: '1..0.1..0.1.',period:0.5},
+],
+  head:{text:'Write Cycle', tock: 0,},
+ config: {hscale: 2}}
