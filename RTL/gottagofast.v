@@ -23,6 +23,7 @@ Inspired by mkl's mem68k
 //`define cdtv      // Uncomment to build CDTV compatible version
 //`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
 `define rev_b
+`define snoopy      // !EXPERIMENTAL! Snoop on the autoconfig cycles so we can jump in at the end without using snoop_cfgin
 
 module gottagofast(
     input CLK,
@@ -84,6 +85,56 @@ localparam Offer_8M = 3'b000,
 
 assign DBUS[15:12] = (RESETn & autoconfig_cycle & RWn & !ASn & !UDSn) ? data_out[3:0] : 'bZ;
 
+`ifdef snoopy
+// Autoconfig bus snooping
+//
+// For some reason Kickstart 2 and up scan the chain multiple times
+// Thanks to this we can snoop on autoconfig cycles and then speak up once
+// every other board is done being configured.
+// No CFGIN connection needed!
+reg [3:0] mfg_bad;
+reg snoop_cfg;
+reg snoop_cfg_next;
+
+always @(posedge UDSn or negedge RESETn)
+begin
+  if (!RESETn) begin
+    snoop_cfg_next <= 1'b0;
+    snoop_cfg <= 1'b0;
+    mfg_bad <= 'b0;
+  end else if (ADDR[23:16] == 8'hE8 & RWn) begin
+    case (ADDR[8:1])
+      8'h0C>>1:
+        if (!(DBUS[15:12] == 4'hF)) begin
+          snoop_cfg_next <= 1;
+        end
+      8'h10>>1:
+        if (DBUS[15:12] == 4'hF) begin // Manufacturer ID - Should not be $FFFF 
+          mfg_bad[3] <= 1;
+        end
+      8'h12>>1:
+        if (DBUS[15:12] == 4'hF) begin // Manufacturer ID - Should not be $FFFF 
+          mfg_bad[2] <= 1;
+        end
+      8'h14>>1:
+        if (DBUS[15:12] == 4'hF) begin // Manufacturer ID - Should not be $FFFF 
+          mfg_bad[1] <= 1;
+        end
+      8'h16>>1:
+        if (DBUS[15:12] == 4'hF) begin // Manufacturer ID - Should not be $FFFF 
+          mfg_bad[0] <= 1;
+        end
+      8'h42>>1, 8'h40>>1:
+        if (snoop_cfg_next == 1) begin
+         snoop_cfg <= 1;
+        end else if (mfg_bad[3:0] == 4'b1111) begin
+         snoop_cfg <= 1;
+      end
+    endcase
+  end
+end
+`endif
+
 `ifdef cdtv
 reg cdtv_configured;
 
@@ -97,9 +148,9 @@ assign autoconfig_cycle = (ADDR[23:16] == 8'hE8) & !CFGINnr & !shutup;
 // So we wait until it's configured before we talk
 always @(negedge UDSn or negedge reset)
 begin
-    if (!reset) begin
-      cdtv_configured <= 1'b0;
-    end else begin
+  if (!reset) begin
+    cdtv_configured <= 1'b0;
+  end else begin
     if (ADDR[23:16] == 8'hE8 & ADDR[8:1] == 8'h24 & !ASn & !RWn) begin
       cdtv_configured <= 1'b1;
     end
@@ -115,7 +166,11 @@ begin
     CFGINnr <= 1'b1;
   end else begin
     CFGOUTn <= !shutup;
+`ifndef snoopy
     CFGINnr <= CFGINn;
+`else
+    CFGINnr <= !snoop_cfg;
+`endif
   end
 end
 
