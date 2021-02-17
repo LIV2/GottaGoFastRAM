@@ -21,7 +21,6 @@ Inspired by mkl's mem68k
 // Config defines
 `define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
 //`define cdtv      // Uncomment to build CDTV compatible version
-//`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
 `define rev_b
 
 module gottagofast(
@@ -59,7 +58,7 @@ reg [7:0] addr_match;
 `ifdef autoconfig
 // Autoconfig
 localparam [15:0] mfg_id  = 16'h07DB;
-localparam [7:0]  prod_id = 8'd69;
+localparam [7:0]  prod_id = 8'd59;
 localparam [15:0] serial  = 16'd421;
 
 wire autoconfig_cycle;
@@ -69,18 +68,11 @@ reg configured;
 reg [2:0] autoconfig_state;
 reg [3:0] data_out;
 
-localparam Offer_8M = 3'b000,
-// If offering 2MB + 4MB blocks you need to offer the 2MB block first
-// This is because of a kickstart bug where the memory config overflows if there is already 2MB configured before another 4MB then 2MB is configured...
-`ifdef Offer_6M
-        Offer_2M = 3'b001,
-        Offer_4M = 3'b010,
-`else
-        Offer_4M = 3'b001,
-        Offer_2M = 3'b010,
-`endif
-        Offer_1M = 3'b011,
-        SHUTUP   = 3'b100;
+localparam Offer_Block1 = 3'b000,
+           Offer_Block2 = 3'b001,
+           Offer_Block3 = 3'b010,
+           Offer_Block4 = 3'b011,
+           SHUTUP       = 3'b100;
 
 assign DBUS[15:12] = (RESETn & autoconfig_cycle & RWn & !ASn & !UDSn) ? data_out[3:0] : 'bZ;
 
@@ -119,22 +111,15 @@ begin
   end
 end
 
-// Offers an 8MB block first, if there's no space offer 4MB, 2MB then 1MB before giving up
+// Offer up to 8MB in 2MB Blocks
 always @(posedge CLK or negedge reset)
 begin
   if (!reset) begin
     data_out <= 'bZ;
   end else if (autoconfig_cycle & RWn) begin
-    case (ADDR[8:1])
-      8'h00:   data_out <= 4'b1110;
-      8'h01: 
-        case (autoconfig_state)
-          Offer_8M: data_out <= 4'b0000;
-          Offer_4M: data_out <= 4'b0111;
-          Offer_2M: data_out <= 4'b0110;
-          Offer_1M: data_out <= 4'b0101;
-          default:  data_out <= 4'b0000;
-        endcase
+    case (ADDR[8:1])     
+      8'h00:   data_out <= (autoconfig_state == SHUTUP) ? 4'b1100 : 4'b1110; // Were we told to shut up last time?
+      8'h01:   data_out <= (autoconfig_state == SHUTUP) ? 4'b0001 : 4'b0110; // If so, offer a 64kb memory block not linked to free list to fix yellow screen
       8'h02:   data_out <= ~prod_id[7:4]; // Product number
       8'h03:   data_out <= ~prod_id[3:0]; // Product number
       8'h04:   data_out <= ~4'b1000;
@@ -157,69 +142,34 @@ end
 always @(negedge UDSn or negedge reset)
 begin
   if (!reset) begin
-    configured <= 1'b0;
-    shutup <= 1'b0;
-    addr_match <= 8'b00000000;
-    autoconfig_state <= Offer_8M;
+    configured       <= 1'b0;
+    shutup           <= 1'b0;
+    addr_match       <= 8'b00000000;
+    autoconfig_state <= Offer_Block1;
   end else if (autoconfig_cycle & !ASn & !RWn) begin
     if (ADDR[8:1] == 8'h26) begin
-      // We've been told to shut up (not enough memory space)
-      // Try offering a smaller block
-      if (autoconfig_state >= SHUTUP-1) begin
-        // All options exhausted - time to shut up!
+      // Shutup register
+      if (autoconfig_state == SHUTUP) begin
         shutup <= 1;
-        autoconfig_state <= SHUTUP;
       end else begin
-        // Offer the next smallest block
-        autoconfig_state <= autoconfig_state + 1;
+        autoconfig_state <= SHUTUP; // Goto the bug fix cycle
       end
     end
     else if (ADDR[8:1] == 8'h24) begin
-      case (autoconfig_state)
-        Offer_8M:
-          begin
-            addr_match <= 8'hFF;
-            shutup     <= 1'b1;
-          end
-        Offer_4M:
-          begin
-            case(DBUS)
-              4'h2:    addr_match <= (addr_match|8'b00001111);
-              4'h4:    addr_match <= (addr_match|8'b00111100);
-              4'h6:    addr_match <= (addr_match|8'b11110000);
-            endcase
-            shutup     <= 1'b1;
-          end
-        Offer_2M:
-          begin
-            case(DBUS)
-              4'h2:    addr_match <= (addr_match|8'b00000011);
-              4'h4:    addr_match <= (addr_match|8'b00001100);
-              4'h6:    addr_match <= (addr_match|8'b00110000);
-              4'h8:    addr_match <= (addr_match|8'b11000000);
-            endcase
-            `ifdef Offer_6M
-            autoconfig_state <= Offer_4M;
-            `else
-            shutup     <= 1'b1;
-            `endif
-          end
-        Offer_1M:
-          begin
-            case(DBUS)
-              4'h2:    addr_match <= (addr_match|8'b00000001);
-              4'h3:    addr_match <= (addr_match|8'b00000010);
-              4'h4:    addr_match <= (addr_match|8'b00000100);
-              4'h5:    addr_match <= (addr_match|8'b00001000);
-              4'h6:    addr_match <= (addr_match|8'b00010000);
-              4'h7:    addr_match <= (addr_match|8'b00100000);
-              4'h8:    addr_match <= (addr_match|8'b01000000);
-              4'h9:    addr_match <= (addr_match|8'b10000000);
-            endcase
-            shutup     <= 1'b1;
-          end
-        default:  addr_match <= 8'b0;
-      endcase
+      // Configure Register
+      begin
+        case(DBUS)
+          4'h2:    addr_match <= (addr_match|8'b00000011);
+          4'h4:    addr_match <= (addr_match|8'b00001100);
+          4'h6:    addr_match <= (addr_match|8'b00110000);
+          4'h8:    addr_match <= (addr_match|8'b11000000);
+        endcase
+        if (autoconfig_state < Offer_Block4) begin
+          autoconfig_state <= autoconfig_state + 1;
+        end else begin
+          shutup <= 1;
+        end
+      end
       configured <= 1'b1;
     end
   end
