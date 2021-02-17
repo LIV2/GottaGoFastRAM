@@ -30,6 +30,8 @@ If you are going to mount using the socket pins and not stacking with an ide68k 
 ## Cfgin/out
 These pins allow you to insert the memory module into your autoconfig chain.  
 If there are no other autoconfig devices in your system you can just leave these unconnected otherwise you will need to either connect CFGOut to the CFGin of the first device in your existing autoconfig chain, or connect CFGIn to the CFGOut pin of the last device in your existing autoconfig chain.  
+In the Amiga 2000 you can connect CFGIN to U606 Pin 8 which will add the device to the end of the chain but __NOTE: This takes up the config signal for the leftmost slot (CN601) so do NOT install a Zorro card there__
+
 You can also connect cfgin and cfgout with a jumper to disable the device temporarily
 
 ## Jumpers
