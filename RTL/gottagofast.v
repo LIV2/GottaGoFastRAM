@@ -93,6 +93,12 @@ reg [3:0] board_reg01;
 reg [3:0] board_flags;
 reg [3:0] snooped_autoconfig_state;
 reg autoconfig_setup;
+reg [3:0] dbus_latched;
+
+always @(posedge CLK)
+begin
+  dbus_latched <= DBUS[15:12];
+end
 
 always @(posedge UDSn or negedge RESETn)
 begin
@@ -100,37 +106,39 @@ begin
     snoop_cfg_next <= 1'b0;
     snoop_cfg <= 1'b0;
     mfg_bad <= 'b0;
+    snooped_autoconfig_state <= Offer_Block1;
   end else if (ADDR[23:16] == 8'hE8 & RWn) begin
     case (ADDR[8:1])
     // Sniff board configuration sizes so we can shrink our offering appropriately
     8'h00>>1:
-     board_reg00 <= DBUS[15:12];
+     board_reg00 <= dbus_latched;
     8'h02>>1:
-     board_reg01 <= DBUS[15:12];
+     board_reg01 <= dbus_latched;
     8'h08>>1:
-     board_flags <= ~DBUS[15:12];
+     board_flags <= ~dbus_latched;
+
     // Chain snooping
     //
     // If Reserved byte is not $F or manufacturer id is $FFFF then no board is answering
     // Once this happens we can set ourselves up to talk to the next autoconfig query
     8'h0C>>1:
-      if (!(DBUS[15:12] == 4'hF)) begin // Reserved byte - Should be $FF
+      if (!(dbus_latched == 4'hF)) begin // Reserved byte - Should be $FF
         snoop_cfg_next <= 1;
       end
     8'h10>>1:
-      if (DBUS[15:12] == 4'hF) begin // Manufacturer ID - Should not be $FFFF
+      if (dbus_latched == 4'hF) begin // Manufacturer ID - Should not be $FFFF
         mfg_bad[3] <= 1;
       end
     8'h12>>1:
-      if (DBUS[15:12] == 4'hF) begin // Manufacturer ID - Should not be $FFFF
+      if (dbus_latched == 4'hF) begin // Manufacturer ID - Should not be $FFFF
         mfg_bad[2] <= 1;
       end
     8'h14>>1:
-      if (DBUS[15:12] == 4'hF) begin // Manufacturer ID - Should not be $FFFF
+      if (dbus_latched == 4'hF) begin // Manufacturer ID - Should not be $FFFF
         mfg_bad[1] <= 1;
       end
     8'h16>>1:
-      if (DBUS[15:12] == 4'hF) begin // Manufacturer ID - Should not be $FFFF
+      if (dbus_latched == 4'hF) begin // Manufacturer ID - Should not be $FFFF
         mfg_bad[0] <= 1;
       end
     8'h42>>1, 8'h40>>1:
@@ -210,7 +218,8 @@ begin
   if (!reset) begin
     data_out <= 'bZ;
   end else if (autoconfig_cycle & RWn) begin
-    case (ADDR[8:1])      8'h00:   data_out <= 4'b1110;
+    case (ADDR[8:1])      
+      8'h00:   data_out <= 4'b1110;
       8'h01:   data_out <= 4'b0110;
       8'h02:   data_out <= ~prod_id[7:4]; // Product number
       8'h03:   data_out <= ~prod_id[3:0]; // Product number
@@ -242,7 +251,7 @@ begin
     autoconfig_setup <= 1'b0;
   end else if (autoconfig_setup == 0 & snoop_cfg == 1) begin
     autoconfig_state <= snooped_autoconfig_state;
-  autoconfig_setup <= 1;
+    autoconfig_setup <= 1;
   if (snooped_autoconfig_state == SHUTUP) begin
     shutup <= 1;
   end
