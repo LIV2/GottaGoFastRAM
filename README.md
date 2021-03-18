@@ -39,6 +39,7 @@ J1: Cfgin pull up/down (You will probably want to leave this at default unless y
 J2-3: Bridge these if you have not fitted the buffer U4
 
 ## CDTV
+__NOTE: Reported as not working in CDTV. I'm not sure why and haven't got one to test with__  
 The CDTV's DMAC takes up the first autoconfig slot, so if you intend to use this with a CDTV use the CDTV specific .JED file to program the CPLD
 
 ## Timing Diagrams
