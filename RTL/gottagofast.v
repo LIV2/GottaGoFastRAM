@@ -20,7 +20,7 @@ Inspired by mkl's mem68k
 
 // Config defines
 `define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
-//`define cdtv      // Uncomment to build CDTV compatible version
+`define cdtv      // Uncomment to build CDTV compatible version
 //`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
 `define rev_b
 
@@ -84,15 +84,11 @@ localparam Offer_8M = 3'b000,
 
 assign DBUS[15:12] = (RESETn & autoconfig_cycle & RWn & !ASn & !UDSn) ? data_out[3:0] : 'bZ;
 
+assign autoconfig_cycle = (ADDR[23:16] == 8'hE8) & !CFGINnr & !shutup;
+
 `ifdef cdtv
 reg cdtv_configured;
 
-assign autoconfig_cycle = (ADDR[23:16] == 8'hE8) & !CFGINnr & !shutup & cdtv_configured;
-`else
-assign autoconfig_cycle = (ADDR[23:16] == 8'hE8) & !CFGINnr & !shutup;
-`endif
-
-`ifdef cdtv
 // CDTV DMAC is first in chain.
 // So we wait until it's configured before we talk
 always @(negedge UDSn or negedge reset)
@@ -115,7 +111,11 @@ begin
     CFGINnr <= 1'b1;
   end else begin
     CFGOUTn <= !shutup;
+`ifdef cdtv
+    CFGINnr <= CFGINn | !cdtv_configured;
+`else
     CFGINnr <= CFGINn;
+`endif
   end
 end
 
@@ -229,14 +229,14 @@ end
 // Memory controller
 
 assign RASn  = !(access_ras | (refresh_ras & refresh_cas));
-assign UCASn = !((access_ucas) | refresh_cas);
-assign LCASn = !((access_lcas) | refresh_cas);
+assign UCASn = !(access_ucas | refresh_cas);
+assign LCASn = !(access_lcas | refresh_cas);
 `ifdef rev_b  // On Rev B OEn drives the buffers
-assign OEn   = !ram_cycle | ASn | !RESETn | (UDSn & LDSn);
+assign OEn = !(!RWn | (ram_cycle & !ASn & (!UDSn | !LDSn)) & RESETn);
 `else
 assign OEn   = !(RWn & access_ras);
 `endif
-assign MEMWn = RWn | (UDSn & LDSn);
+assign MEMWn = refresh_cas | RWn; // Write should be high for CBR refresh;
 
 // Filter reset line by registering it
 always @(posedge CLK)
@@ -289,16 +289,16 @@ begin
   end
 end
 
-always @(posedge CLK or negedge reset)
+always @(posedge CLK or posedge ASn)
 begin
-  if (!reset) begin
+  if (ASn) begin
     access_ras  <= 1'b0;
     access_ucas <= 1'b0;
     access_lcas <= 1'b0;
   end else begin
-    access_ras  <= (ram_cycle & !access_ucas & !access_lcas); // Assert @ S4, Deassert @ S0
-    access_ucas <= (access_ras & !access_ucas & !UDSn);       // Assert @ S6, Deassert @ S0
-    access_lcas <= (access_ras & !access_lcas & !LDSn);       // Assert @ S6, Deassert @ S0
+    access_ras  <= (ram_cycle); // Assert @ S4, Deassert @ S0
+    access_ucas <= (access_ras & !UDSn);       // Assert @ S6, Deassert @ S0
+    access_lcas <= (access_ras & !LDSn);       // Assert @ S6, Deassert @ S0
   end
 end
 
