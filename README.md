@@ -14,6 +14,7 @@ Rather than use the original mem68k Abel code I have written a new memory contro
 5. [CDTV](#cdtv)
 6. [Timing Diagrams](#timing-diagrams)
 7. [Bill of materials](#bill-of-materials)
+8. [Experimental firmware](#experimental-firmware)
 
 ## Ordering PCBs
 I recommend ordering the PCB with a 0.6 or 0.8mm thickness if you intend on stacking with an ide68k or mouting using a DIP socket/machined pin strips.  
@@ -61,3 +62,6 @@ The CDTV's DMAC takes up the first autoconfig slot, so if you intend to use this
 |10uF Ceramic Capacitor, 1206|C3|1|[Mouser](https://www.mouser.com/ProductDetail/80-C1206C106K4R)||
 |Socket pins|Pins|64|[Aliexpress](https://www.aliexpress.com/item/32791545218.html?spm=a2g0o.productlist.0.0.6e223b55CVrXSq&algo_pvid=8fda9f5a-6e07-4dc8-9ed4-bd809bf75756&algo_expid=8fda9f5a-6e07-4dc8-9ed4-bd809bf75756-0&btsid=2100bde316043149660504011ef819&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603_)|Use these if stacking with an ide68k module|
 |64-Pin DIP socket - machined pin|Pins|1|[Mouser](https://www.mouser.com/ProductDetail/575-193964)|If not stacking with ide68k - pcb can be soldered to bottom of this flush with the plastic|
+
+## Experimental Firmware
+* [AutoSnoop Firmware - Autoconfig after all other Z2 devices without any wires](https://github.com/LIV2/GottaGoFastRAM/tree/snoopy)
