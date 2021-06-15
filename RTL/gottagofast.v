@@ -142,7 +142,7 @@ begin
       if (dbus_latched == 4'hF) begin // Manufacturer ID - Should not be $FFFF
         mfg_bad[0] <= 1;
       end
-    8'h42>>1, 8'h40>>1:
+    8'h3c>>1:
       if (snoop_cfg_next == 1) begin
        snoop_cfg <= 1;
       end else if (mfg_bad[3:0] == 4'b1111) begin
@@ -219,11 +219,7 @@ begin
   if (!reset) begin
     data_out <= 'bZ;
   end else if (autoconfig_cycle & RWn) begin
-<<<<<<< HEAD
     case (ADDR[8:1])
-=======
-    case (ADDR[8:1])      
->>>>>>> c335171... It helps to reset registers at reset...
       8'h00:   data_out <= 4'b1110;
       8'h01:   data_out <= 4'b0110;
       8'h02:   data_out <= ~prod_id[7:4]; // Product number
