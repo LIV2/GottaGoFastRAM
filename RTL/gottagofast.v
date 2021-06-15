@@ -22,7 +22,7 @@ Inspired by mkl's mem68k
 `define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
 //`define cdtv      // Uncomment to build CDTV compatible version
 //`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
-`define rev_b
+//`define rev_b
 `define snoopy      // !EXPERIMENTAL! Snoop on the autoconfig cycles so we can adjust our size & also not require cfgin
 
 module gottagofast(
@@ -141,7 +141,7 @@ begin
       if (dbus_latched == 4'hF) begin // Manufacturer ID - Should not be $FFFF
         mfg_bad[0] <= 1;
       end
-    8'h42>>1, 8'h40>>1:
+    8'h3c>>1:
       if (snoop_cfg_next == 1) begin
        snoop_cfg <= 1;
       end else if (mfg_bad[3:0] == 4'b1111) begin
