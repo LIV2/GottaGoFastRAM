@@ -1,5 +1,11 @@
 # GottaGoFastRAM 8MB Autoconfig Fast RAM
 
+## !! EXPERIMENTAL FIRMWARE !!
+This branch includes an experimental firmware that allows this board to coexist with other Autoconfig devices without needing any cfgin/out connection
+
+This requires Kickstart 2 or higher
+
+
 This is an 8MB Autoconfig Fast RAM for Amiga 500/1000/2000/CDTV based on mkl's mem68k  
 It's small size allows it to be stacked on top of an ide68k board  
 Rather than use the original mem68k Abel code I have written a new memory controller in Verilog
