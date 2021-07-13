@@ -18,11 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Inspired by mkl's mem68k
 */
 
-// Config defines
-`define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
+// Config defines - SET THESE IF NOT USING THE MAKEFILE
+//`define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
 //`define cdtv      // Uncomment to build CDTV compatible version
 //`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
-`define rev_b
+//`define rev_b
 
 module gottagofast(
     input CLK,
