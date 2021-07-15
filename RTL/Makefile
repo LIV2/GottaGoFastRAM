@@ -4,9 +4,9 @@ WORKDIR=tmp
 
 CABLE=usb21
 
-CPLDFITFLAGS=-loc on -slew fast -init low -terminate keeper -nogclkopt -nogtsopt -nogsropt -power std -ignoretspec -optimize speed -keepio -inputs 54 -pterms 25
-REV_A_DEFINES=autoconfig rev_a
-REV_B_DEFINES=autoconfig rev_b
+CPLDFITFLAGS=-loc on -slew slow -init low -terminate keeper -nogclkopt -nogtsopt -nogsropt -power std -ignoretspec -optimize speed -keepio -inputs 54 -pterms 25
+REV_A_DEFINES=makedefines autoconfig rev_a
+REV_B_DEFINES=makedefines autoconfig rev_b
 
 .PHONY:	all clean
 
@@ -56,29 +56,41 @@ flash-reva:	$(PROJECT)_rev_a.jed
 	"setCable -p $(CABLE)\n"\
 	"identify\n"\
 	"assignfile -p 1 -file $<\n"\
+	"erase -p 1\n"\
 	"program -p 1\n"\
-	"verify -p 1" | LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch
+	"verify -p 1\n"\
+	"exit" > batch
+	LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch batch
 	
 flash-reva-cdtv:	$(PROJECT)_cdtv_rev_a.jed
 	@echo "setMode -bs\n"\
 	"setCable -p $(CABLE)\n"\
 	"identify\n"\
 	"assignfile -p 1 -file $<\n"\
+	"erase -p 1\n"\
 	"program -p 1\n"\
-	"verify -p 1" | LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch
+	"verify -p 1\n"\
+	"exit" > batch
+	LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch batch
 
 flash-revb:	$(PROJECT)_rev_b.jed
 	@echo "setMode -bs\n"\
 	"setCable -p $(CABLE)\n"\
 	"identify\n"\
 	"assignfile -p 1 -file $<\n"\
+	"erase -p 1\n"\
 	"program -p 1\n"\
-	"verify -p 1" | LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch
+	"verify -p 1\n"\
+	"exit" > batch
+	LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch batch
 	
 flash-revb-cdtv:	$(PROJECT)_cdtv_rev_b.jed
 	@echo "setMode -bs\n"\
 	"setCable -p $(CABLE)\n"\
 	"identify\n"\
 	"assignfile -p 1 -file $<\n"\
+	"erase -p 1\n"\
 	"program -p 1\n"\
-	"verify -p 1" | LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch
+	"verify -p 1\n"\
+	"exit" > batch
+	LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch batch
