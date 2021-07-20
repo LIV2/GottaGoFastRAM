@@ -53,15 +53,15 @@ If you have a Rev A or Rev B (not B1) board you will need to apply a [small mod 
 |Component|Location|QTY|Link|Remarks|
 |---------|--------|---|------|--------|
 |4Mx16 3V DRAM TSSOP - K4E641612D or GM71VS65163 |U3|1|-|eBay/Aliexpress etc.|
-|XC9572XL-10VQ64C|U1|1|[Mouser](https://www.mouser.se/ProductDetail/217-C9572XL-10VQG64C)||
-|74LVC2G17|U4|1|[Mouser](https://www.mouser.com/ProductDetail/771-74LVC2G17GVQ100H)||
-|AP2210N-3.3|U5|1|[Mouser](https://www.mouser.com/ProductDetail/621-AP2210N-3.3TRG1)||
-|74LVC245N TSSOP|U6,U7|2|[Mouser](https://www.mouser.com/ProductDetail/595-SN74LVC245APWR)||
-|Ferrite Bead, 1206 package|FB1, FB2|2|[Mouser](https://www.mouser.com/ProductDetail/875-MI1206K601R-10)||
-|10K Resistor, 0603|R1|1|[Mouser](https://www.mouser.com/ProductDetail/603-RT0603FRE0710KL)||
-|0.1uF Ceramic Capacitor, 0603|C1,4-13|11|[Mouser](https://www.mouser.com/ProductDetail/80-C603C104K5RAC3121)||
-|4.7uF Ceramic Capacitor, 1206|C2|1|[Mouser](https://www.mouser.com/ProductDetail/791-1206X475K160CT)||
-|10uF Ceramic Capacitor, 1206|C3|1|[Mouser](https://www.mouser.com/ProductDetail/80-C1206C106K4R)||
+|XC9572XL-10VQ64C|U1|1|[Mouser](https://www.mouser.se/ProductDetail/217-C9572XL-10VQG64C)<br />[DigiKey](https://www.digikey.com/short/2f7qn38b)||
+|74LVC2G17 TSSOP-6/SOT-363|U4|1|[Mouser](https://www.mouser.com/ProductDetail/771-74LVC2G17GVQ100H)<br />[DigiKey](https://www.digikey.com/short/95mn57tt) ||
+|AP2210N-3.3 SOT-23|U5|1|[Mouser](https://www.mouser.com/ProductDetail/621-AP2210N-3.3TRG1)<br />[DigiKey](https://www.digikey.com/short/30rd0zn5)|Maybe can be substituted with MCP1703AT-3302E|
+|74LVC245N TSSOP|U6,U7|2|[Mouser](https://www.mouser.com/ProductDetail/595-SN74LVC245APWRG4)<br />[DigiKey](https://www.digikey.com/short/pnq3wff3)|Can be substituted with SN74LVTH245 or SN74LVCR2245|
+|Ferrite Bead, 1206 package|FB1, FB2|2|[Mouser](https://www.mouser.com/ProductDetail/875-MI1206K601R-10)<br />[DigiKey](https://www.digikey.com/short/n4p04ctv)|Can be substituted with 0 Ohm 1206 resistors|
+|10K Resistor, 0603|R1|1|[Mouser](https://www.mouser.com/ProductDetail/603-RT0603FRD0710KL)<br />[DigiKey](https://www.digikey.com/short/nvvrt5dw)||
+|0.1uF Ceramic Capacitor, 0603|C1,4-13|11|[Mouser](https://www.mouser.com/ProductDetail/80-C603C104K5RAC3121)<br />[DigiKey](https://www.digikey.com/short/f7trtfwt)||
+|4.7uF Ceramic Capacitor, 1206|C2|1|[Mouser](https://www.mouser.com/ProductDetail/187-CL31B475KAHNFNE)<br />[DigiKey](https://www.digikey.com/short/d7mbf5nn)||
+|10uF Ceramic Capacitor, 1206|C3|1|[Mouser](https://www.mouser.com/ProductDetail/187-CL31A106MAHNNNE)<br />[DigiKey](https://www.digikey.com/short/rqt1br0q)||
 |Socket pins|Pins|64|[Aliexpress](https://www.aliexpress.com/item/32791545218.html?spm=a2g0o.productlist.0.0.6e223b55CVrXSq&algo_pvid=8fda9f5a-6e07-4dc8-9ed4-bd809bf75756&algo_expid=8fda9f5a-6e07-4dc8-9ed4-bd809bf75756-0&btsid=2100bde316043149660504011ef819&ws_ab_test=searchweb0_0,searchweb201602_,searchweb201603_)|Use these if stacking with an ide68k module|
 |64-Pin DIP socket - machined pin|Pins|1|[Mouser](https://www.mouser.com/ProductDetail/575-193964)|If not stacking with ide68k - pcb can be soldered to bottom of this flush with the plastic|
 
