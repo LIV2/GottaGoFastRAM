@@ -15,13 +15,13 @@ Rather than use the original mem68k Abel code I have written a new memory contro
 ## Table of contents
 1. [PCB Ordering](#ordering-pcbs)
 2. [Mounting Options](#mounting-options)
+9. [Experimental firmware](#experimental-firmware)
 3. [Cfgin/out](#cfginout)
 4. [Jumpers](#jumpers)
 5. [CDTV](#cdtv)
 6. [Timing Diagrams](#timing-diagrams)
 7. [Bill of materials](#bill-of-materials)
 8. [Known Issues](#known-issues)
-9. [Experimental firmware](#experimental-firmware)
 
 ## Ordering PCBs
 I recommend ordering the PCB with a 0.6 or 0.8mm thickness if you intend on stacking with an ide68k or mouting using a DIP socket/machined pin strips.  
@@ -34,6 +34,14 @@ If you are going to mount using the socket pins and not stacking with an ide68k 
 2. Can be soldered to socket pins and stacked with an ide68k  
 <img src="Images/stacked1.jpg" width=300 />  
 <img src="Images/stacked2.jpg" width=300 />  
+
+## Experimental Firmware
+* [AutoSnoop Firmware - Autoconfig after all other Z2 devices without any wires](Binaries/experimental)  
+
+
+__Requires Kickstart 2 or higher__  
+The AutoSnoop firmware allows this board to work in a system with other autoconfig devices without needing any cfgin/out wires  
+The firmware will watch the bus and wait until all other boards are configured before speaking up itself - allowing it to cooperate with other autoconfig devices without needing any wires connected to cfgin/out
 
 ## Cfgin/out
 These pins allow you to insert the memory module into your autoconfig chain.  
@@ -73,6 +81,3 @@ If you have a Rev A or Rev B (not B1) board you will need to apply a [small mod 
 
 ## Known issues
 1. Rev A & B - Incorrect voltage supplied to U4 causes incompatibility with CDTV. Fixed in Rev B1 but you can [rework Rev A or B boards by following the instructions here](https://github.com/LIV2/GottaGoFastRAM/issues/4/#issuecomment-868977723)
-
-## Experimental Firmware
-* [AutoSnoop Firmware - Autoconfig after all other Z2 devices without any wires](https://github.com/LIV2/GottaGoFastRAM/tree/snoopy)

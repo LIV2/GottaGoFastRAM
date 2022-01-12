@@ -1,7 +1,7 @@
 PROJECT=gottagofast
 PART=XC9572XL-10-VQ64
 WORKDIR=tmp
-
+BINDIR=../Binaries
 CABLE=usb21
 
 CPLDFITFLAGS=-loc on -slew slow -init low -terminate keeper -nogclkopt -nogtsopt -nogsropt -power std -ignoretspec -optimize speed -keepio -inputs 54 -pterms 25
@@ -10,7 +10,7 @@ REV_B_DEFINES=makedefines autoconfig rev_b
 
 .PHONY:	all clean
 
-all:	gottagofast_rev_a.jed gottagofast_rev_b.jed gottagofast_cdtv_rev_a.jed gottagofast_cdtv_rev_b.jed
+all:	$(BINDIR)/gottagofast_rev_a.jed $(BINDIR)/gottagofast_rev_b.jed $(BINDIR)/gottagofast_cdtv_rev_a.jed $(BINDIR)/gottagofast_cdtv_rev_b.jed $(BINDIR)/experimental/gottagofast_autosnoop_rev_a.jed $(BINDIR)/experimental/gottagofast_autosnoop_rev_b.jed
 
 $(PROJECT).prj:
 	@echo verilog work $(PROJECT).v > $@
@@ -35,6 +35,15 @@ $(WORKDIR)/$(PROJECT)_cdtv_rev_b.ngc:	$(PROJECT).v $(PROJECT).prj
 	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(REV_B_DEFINES) cdtv}#g" template.xst > $@.xst
 	cd $(WORKDIR) && xst -ifn ../$@.xst -ofn $(PROJECT)-xst.log
 
+$(WORKDIR)/$(PROJECT)_autosnoop_rev_a.ngc:	$(PROJECT).v $(PROJECT).prj
+	@mkdir $(WORKDIR) || true
+	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(REV_A_DEFINES) snoopy}#g" template.xst > $@.xst
+	cd $(WORKDIR) && xst -ifn ../$@.xst -ofn $(PROJECT)-xst.log
+
+$(WORKDIR)/$(PROJECT)_autosnoop_rev_b.ngc:	$(PROJECT).v $(PROJECT).prj
+	@mkdir $(WORKDIR) || true
+	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(REV_B_DEFINES) snoopy}#g" template.xst > $@.xst
+	cd $(WORKDIR) && xst -ifn ../$@.xst -ofn $(PROJECT)-xst.log
 
 $(WORKDIR)/%.ngd:	$(WORKDIR)/%.ngc $(PROJECT).ucf
 	cd $(WORKDIR) && ngdbuild -p $(PART) -uc ../$(PROJECT).ucf ../$< ../$@
@@ -44,12 +53,22 @@ $(WORKDIR)/%.vm6:	$(WORKDIR)/%.ngd $(PROJECT).ucf
 
 %.jed:	$(WORKDIR)/%.vm6
 	hprep6 -i $<
-	cp $@ ../Binaries/
+
+$(BINDIR)/%.jed: %.jed
+	mv $< $(BINDIR)
+
+$(BINDIR)/experimental/%.jed: %.jed
+	- @mkdir -p $(BINDIR)/experimental
+	mv $< $(BINDIR)/experimental
 
 clean:
-	rm -rvf tmp
-	rm *.jed
-	rm *.prj
+	- rm -rvf tmp
+	- rm -fv *.jed
+	- rm -fv *.prj
+
+cleanjeds: 
+	- @rm -fv $(BINDIR)/*.jed
+	- @rm -fv $(BINDIR)/experimental/*.jed
 
 flash-reva:	$(PROJECT)_rev_a.jed
 	@echo "setMode -bs\n"\
@@ -62,7 +81,7 @@ flash-reva:	$(PROJECT)_rev_a.jed
 	"exit" > batch
 	LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch batch
 	
-flash-reva-cdtv:	$(PROJECT)_cdtv_rev_a.jed
+flash-reva-cdtv:	$(BINDIR)/$(PROJECT)_cdtv_rev_a.jed
 	@echo "setMode -bs\n"\
 	"setCable -p $(CABLE)\n"\
 	"identify\n"\
@@ -73,7 +92,7 @@ flash-reva-cdtv:	$(PROJECT)_cdtv_rev_a.jed
 	"exit" > batch
 	LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch batch
 
-flash-revb:	$(PROJECT)_rev_b.jed
+flash-revb:	$(BINDIR)/$(BINDIR)/$(PROJECT)_rev_b.jed
 	@echo "setMode -bs\n"\
 	"setCable -p $(CABLE)\n"\
 	"identify\n"\
@@ -84,7 +103,7 @@ flash-revb:	$(PROJECT)_rev_b.jed
 	"exit" > batch
 	LD_PRELOAD=/opt/Xilinx/usb-driver/libusb-driver.so impact -batch batch
 	
-flash-revb-cdtv:	$(PROJECT)_cdtv_rev_b.jed
+flash-revb-cdtv:	$(BINDIR)/$(PROJECT)_cdtv_rev_b.jed
 	@echo "setMode -bs\n"\
 	"setCable -p $(CABLE)\n"\
 	"identify\n"\
