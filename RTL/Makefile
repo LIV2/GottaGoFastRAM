@@ -1,7 +1,7 @@
 PROJECT=gottagofast
 PART=XC9572XL-10-VQ64
 WORKDIR=tmp
-
+BINDIR=../Binaries
 CABLE=usb21
 
 CPLDFITFLAGS=-loc on -slew slow -init low -terminate keeper -nogclkopt -nogtsopt -nogsropt -power std -ignoretspec -optimize speed -keepio -inputs 54 -pterms 25
@@ -10,7 +10,7 @@ REV_B_DEFINES=makedefines autoconfig rev_b
 
 .PHONY:	all clean
 
-all:	gottagofast_rev_a.jed gottagofast_rev_b.jed gottagofast_cdtv_rev_a.jed gottagofast_cdtv_rev_b.jed
+all:	$(BINDIR)/gottagofast_rev_a.jed $(BINDIR)/gottagofast_rev_b.jed $(BINDIR)/gottagofast_cdtv_rev_a.jed $(BINDIR)/gottagofast_cdtv_rev_b.jed
 
 $(PROJECT).prj:
 	@echo verilog work $(PROJECT).v > $@
@@ -44,12 +44,17 @@ $(WORKDIR)/%.vm6:	$(WORKDIR)/%.ngd $(PROJECT).ucf
 
 %.jed:	$(WORKDIR)/%.vm6
 	hprep6 -i $<
-	cp $@ ../Binaries/
+
+$(BINDIR)/%.jed: %.jed
+	cp $< $(BINDIR)
 
 clean:
-	rm -rvf tmp
-	rm *.jed
-	rm *.prj
+	- rm -rvf tmp
+	- rm -fv *.jed
+	- rm -fv *.prj
+
+cleanjeds: 
+	- @rm -fv $(BINDIR)/*.jed
 
 flash-reva:	$(PROJECT)_rev_a.jed
 	@echo "setMode -bs\n"\
