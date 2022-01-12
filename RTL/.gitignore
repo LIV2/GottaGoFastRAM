@@ -1,0 +1,7 @@
+_xmsgs
+tmp/
+*.log
+*.err
+*.jed
+local.mk
+*.prj

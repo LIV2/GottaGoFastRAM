@@ -18,11 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Inspired by mkl's mem68k
 */
 
-// Config defines
+`ifndef makedefines // The defines ignored if being built by Makefile
 `define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
 //`define cdtv      // Uncomment to build CDTV compatible version
 //`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
 `define rev_b
+`endif
 
 module gottagofast(
     input CLK,
@@ -127,7 +128,7 @@ begin
   end else if (autoconfig_cycle & RWn) begin
     case (ADDR[8:1])
       8'h00:   data_out <= 4'b1110;
-      8'h01: 
+      8'h01:
         case (autoconfig_state)
           Offer_8M: data_out <= 4'b0000;
           Offer_4M: data_out <= 4'b0111;
