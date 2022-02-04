@@ -19,6 +19,9 @@ Inspired by mkl's mem68k
 */
 
 `ifndef makedefines // The defines ignored if being built by Makefile
+`define SERIAL 32'd421
+`define PRODID 8'69
+
 `define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
 //`define cdtv      // Uncomment to build CDTV compatible version
 //`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
@@ -61,8 +64,8 @@ reg [7:0] addr_match;
 `ifdef autoconfig
 // Autoconfig
 localparam [15:0] mfg_id  = 16'h07DB;
-localparam [7:0]  prod_id = 8'd69;
-localparam [15:0] serial  = 16'd421;
+localparam [7:0]  prod_id = `PRODID;
+localparam [31:0] serial = `SERIAL;
 
 wire autoconfig_cycle;
 reg shutup = 0;
@@ -230,6 +233,10 @@ begin
       8'h09:   data_out <= ~mfg_id[11:8];  // Manufacturer ID
       8'h0A:   data_out <= ~mfg_id[7:4];   // Manufacturer ID
       8'h0B:   data_out <= ~mfg_id[3:0];   // Manufacturer ID
+      8'h0C:   data_out <= ~serial[31:28]; // Serial number
+      8'h0D:   data_out <= ~serial[27:24]; // Serial number
+      8'h0E:   data_out <= ~serial[23:20]; // Serial number
+      8'h0F:   data_out <= ~serial[19:16]; // Serial number
       8'h10:   data_out <= ~serial[15:12]; // Serial number
       8'h11:   data_out <= ~serial[11:8];  // Serial number
       8'h12:   data_out <= ~serial[7:4];   // Serial number
