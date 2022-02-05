@@ -118,8 +118,14 @@ begin
     CFGOUTn <= 1'b1;
     CFGINnr <= 1'b1;
   end else begin
+// No other Zorro devices in an A600 so we reuse these pins as a jumper
+`ifdef A600 
+    CFGOUTn <= 1;
+    CFGINnr <= 0;
+`else    
     CFGOUTn <= !shutup;
     CFGINnr <= CFGINn;
+`endif
   end
 end
 
@@ -168,7 +174,15 @@ begin
     configured <= 1'b0;
     shutup <= 1'b0;
     addr_match <= 8'b00000000;
+`ifdef A600
+    if (CFGINn == 1) begin
+      autoconfig_state <= Offer_4M;
+    end else begin
+      autoconfig_state <= Offer_8M;
+    end
+`else
     autoconfig_state <= Offer_8M;
+`endif
   end else if (autoconfig_cycle & !ASn & !RWn) begin
     if (ADDR[8:1] == 8'h26) begin
       // We've been told to shut up (not enough memory space)

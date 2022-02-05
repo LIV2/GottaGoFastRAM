@@ -9,6 +9,7 @@ PRODID=69
 CPLDFITFLAGS=-loc on -slew slow -init low -terminate keeper -nogclkopt -nogtsopt -nogsropt -power std -ignoretspec -optimize speed -keepio -inputs 54 -pterms 25
 REV_A_DEFINES=makedefines autoconfig rev_a SERIAL=32'h${SERIAL} PRODID=${PRODID}
 REV_B_DEFINES=makedefines autoconfig rev_b SERIAL=32'h${SERIAL} PRODID=${PRODID}
+A600_DEFINES=makedefines autoconfig rev_b SERIAL=32'h${SERIAL} PRODID=${PRODID} A600
 
 .PHONY:	all clean
 
@@ -37,6 +38,10 @@ $(WORKDIR)/$(PROJECT)_cdtv_rev_b.ngc:	$(PROJECT).v $(PROJECT).prj
 	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(REV_B_DEFINES) cdtv}#g" template.xst > $@.xst
 	cd $(WORKDIR) && xst -ifn ../$@.xst -ofn $(PROJECT)-xst.log
 
+$(WORKDIR)/$(PROJECT)_a600.ngc:	$(PROJECT).v $(PROJECT).prj
+	@mkdir $(WORKDIR) || true
+	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(A600_DEFINES)}#g" template.xst > $@.xst
+	cd $(WORKDIR) && xst -ifn ../$@.xst -ofn $(PROJECT)-xst.log
 
 $(WORKDIR)/%.ngd:	$(WORKDIR)/%.ngc $(PROJECT).ucf
 	cd $(WORKDIR) && ngdbuild -p $(PART) -uc ../$(PROJECT).ucf ../$< ../$@
