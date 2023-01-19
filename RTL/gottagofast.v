@@ -47,17 +47,17 @@ module gottagofast(
     output MEMWn
     );
 
-reg reset_delayed1;
-reg reset;
-
+reg [2:0] reset_sync = 3'b000;
+reg reset      = 0;
+reg reset_edge = 1;
 // Memory controller
 
 reg ram_cycle;
 reg access_ras;
 reg access_ucas;
 reg access_lcas;
-reg refresh_ras;
-reg refresh_cas;
+reg refresh_ras = 0;
+reg refresh_cas = 0;
 reg [7:0] addr_match;
 
 `ifdef autoconfig
@@ -249,25 +249,26 @@ assign MEMWn = RWn | (UDSn & LDSn);
 // Filter reset line by registering it
 always @(posedge CLK)
 begin
-  reset_delayed1 <= RESETn;
-  reset <= reset_delayed1;
+  reset_sync[2:0] <= {reset_sync[1:0],RESETn};
+  reset           <= reset_sync[2];
+  reset_edge      <= reset_sync[2:1] == 2'b10;
 end
 
 // CAS before RAS refresh
 // CAS Asserted in S1 & S2
 // RAS Asserted in S2
-always @(negedge CLK or negedge reset)
+always @(negedge CLK)
 begin
-  if (!reset) begin
+  if (reset_edge) begin
     refresh_cas <= 1'b0;
   end else begin
     refresh_cas <= (!refresh_cas & ASn & !access_ras);
   end
 end
 
-always @(posedge CLK or negedge reset)
+always @(posedge CLK)
 begin
-  if (!reset) begin
+  if (reset_edge) begin
     refresh_ras <= 1'b0;
   end else begin
     refresh_ras <= refresh_cas;
