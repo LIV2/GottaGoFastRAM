@@ -24,7 +24,6 @@ Inspired by mkl's mem68k
 
 `define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
 //`define cdtv      // Uncomment to build CDTV compatible version
-//`define Offer_6M  // If told to shutup when offering 8MB, offer up a 2MB and also 4MB block next (useful with an A590/2091)
 `define rev_b
 `endif
 
@@ -73,18 +72,14 @@ reg configured;
 reg [2:0] autoconfig_state;
 reg [3:0] data_out;
 
-localparam Offer_8M = 3'b000,
+// 6MB Step actually works by appearing as 2 boards, first a 2MB then a 4MB one
 // If offering 2MB + 4MB blocks you need to offer the 2MB block first
 // This is because of a kickstart bug where the memory config overflows if there is already 2MB configured before another 4MB then 2MB is configured...
-`ifdef Offer_6M
-        Offer_2M = 3'b001,
-        Offer_4M = 3'b010,
-`else
-        Offer_4M = 3'b001,
-        Offer_2M = 3'b010,
-`endif
-        Offer_1M = 3'b011,
-        SHUTUP   = 3'b100;
+localparam Offer_8M = 3'b000,
+           Offer_6M = 3'b001,
+           Offer_4M = 3'b010,
+           Offer_2M = 3'b011,
+           SHUTUP   = 3'b100;
 
 assign DBUS[15:12] = (RESETn & autoconfig_cycle & RWn & !ASn & !UDSn) ? data_out[3:0] : 'bZ;
 
@@ -134,9 +129,9 @@ begin
       8'h01:
         case (autoconfig_state)
           Offer_8M: data_out <= 4'b0000;
+          Offer_6M: data_out <= 4'b0110;
           Offer_4M: data_out <= 4'b0111;
           Offer_2M: data_out <= 4'b0110;
-          Offer_1M: data_out <= 4'b0101;
           default:  data_out <= 4'b0000;
         endcase
       8'h02:   data_out <= ~prod_id[7:4]; // Product number
@@ -198,7 +193,7 @@ begin
             endcase
             shutup     <= 1'b1;
           end
-        Offer_2M:
+        Offer_6M, Offer_2M:
           begin
             case(DBUS)
               4'h2:    addr_match <= (addr_match|8'b00000011);
@@ -206,25 +201,12 @@ begin
               4'h6:    addr_match <= (addr_match|8'b00110000);
               4'h8:    addr_match <= (addr_match|8'b11000000);
             endcase
-            `ifdef Offer_6M
-            autoconfig_state <= Offer_4M;
-            `else
-            shutup     <= 1'b1;
-            `endif
-          end
-        Offer_1M:
-          begin
-            case(DBUS)
-              4'h2:    addr_match <= (addr_match|8'b00000001);
-              4'h3:    addr_match <= (addr_match|8'b00000010);
-              4'h4:    addr_match <= (addr_match|8'b00000100);
-              4'h5:    addr_match <= (addr_match|8'b00001000);
-              4'h6:    addr_match <= (addr_match|8'b00010000);
-              4'h7:    addr_match <= (addr_match|8'b00100000);
-              4'h8:    addr_match <= (addr_match|8'b01000000);
-              4'h9:    addr_match <= (addr_match|8'b10000000);
-            endcase
-            shutup     <= 1'b1;
+            if (autoconfig_state == Offer_6M)
+            begin
+              autoconfig_state <= Offer_4M;
+            end else begin
+              shutup <= 1'b1;
+            end
           end
         default:  addr_match <= 8'b0;
       endcase
