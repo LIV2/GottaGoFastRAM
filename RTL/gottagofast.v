@@ -57,7 +57,7 @@ reg access_ucas;
 reg access_lcas;
 reg refresh_ras;
 reg refresh_cas;
-reg [7:0] addr_match;
+reg [3:0] addr_match;
 
 `ifdef autoconfig
 // Autoconfig
@@ -162,7 +162,7 @@ begin
   if (!reset) begin
     configured <= 1'b0;
     shutup <= 1'b0;
-    addr_match <= 8'b00000000;
+    addr_match <= 4'b0000;
     autoconfig_state <= Offer_8M;
   end else if (autoconfig_cycle & !ASn & !RWn) begin
     if (ADDR[8:1] == 8'h26) begin
@@ -181,25 +181,25 @@ begin
       case (autoconfig_state)
         Offer_8M:
           begin
-            addr_match <= 8'hFF;
+            addr_match <= 4'hF;
             shutup     <= 1'b1;
           end
         Offer_4M:
           begin
             case(DBUS)
-              4'h2:    addr_match <= (addr_match|8'b00001111);
-              4'h4:    addr_match <= (addr_match|8'b00111100);
-              4'h6:    addr_match <= (addr_match|8'b11110000);
+              4'h2:    addr_match <= (addr_match|4'b0011);
+              4'h4:    addr_match <= (addr_match|4'b0110);
+              4'h6:    addr_match <= (addr_match|4'b1100);
             endcase
             shutup     <= 1'b1;
           end
         Offer_6M, Offer_2M:
           begin
             case(DBUS)
-              4'h2:    addr_match <= (addr_match|8'b00000011);
-              4'h4:    addr_match <= (addr_match|8'b00001100);
-              4'h6:    addr_match <= (addr_match|8'b00110000);
-              4'h8:    addr_match <= (addr_match|8'b11000000);
+              4'h2:    addr_match <= (addr_match|4'b0001);
+              4'h4:    addr_match <= (addr_match|4'b0010);
+              4'h6:    addr_match <= (addr_match|4'b0100);
+              4'h8:    addr_match <= (addr_match|4'b1000);
             endcase
             if (autoconfig_state == Offer_6M)
             begin
@@ -208,7 +208,7 @@ begin
               shutup <= 1'b1;
             end
           end
-        default:  addr_match <= 8'b0;
+        default:  addr_match <= 4'b0;
       endcase
       configured <= 1'b1;
     end
@@ -265,13 +265,13 @@ begin
 `ifdef autoconfig
     ram_cycle = (
       ((ADDR[23:20] == 4'h2) & addr_match[0]) |
-      ((ADDR[23:20] == 4'h3) & addr_match[1]) |
-      ((ADDR[23:20] == 4'h4) & addr_match[2]) |
-      ((ADDR[23:20] == 4'h5) & addr_match[3]) |
-      ((ADDR[23:20] == 4'h6) & addr_match[4]) |
-      ((ADDR[23:20] == 4'h7) & addr_match[5]) |
-      ((ADDR[23:20] == 4'h8) & addr_match[6]) |
-      ((ADDR[23:20] == 4'h9) & addr_match[7])
+      ((ADDR[23:20] == 4'h3) & addr_match[0]) |
+      ((ADDR[23:20] == 4'h4) & addr_match[1]) |
+      ((ADDR[23:20] == 4'h5) & addr_match[1]) |
+      ((ADDR[23:20] == 4'h6) & addr_match[2]) |
+      ((ADDR[23:20] == 4'h7) & addr_match[2]) |
+      ((ADDR[23:20] == 4'h8) & addr_match[3]) |
+      ((ADDR[23:20] == 4'h9) & addr_match[3])
       ) & !ASn & configured;
 `else
     ram_cycle = ((ADDR[23:20] >= 4'h2) & (ADDR[23:20] <= 4'h9) & !ASn);
