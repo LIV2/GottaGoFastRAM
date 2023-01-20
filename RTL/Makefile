@@ -27,6 +27,16 @@ $(WORKDIR)/$(PROJECT)_rev_b.ngc:	$(PROJECT).v $(PROJECT).prj
 	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(REV_B_DEFINES)}#g" template.xst > $@.xst
 	cd $(WORKDIR) && xst -ifn ../$@.xst -ofn $(PROJECT)-xst.log
 
+$(WORKDIR)/$(PROJECT)_6MB_rev_a.ngc:	$(PROJECT).v $(PROJECT).prj
+	@mkdir $(WORKDIR) || true
+	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(REV_A_DEFINES) Offer_6M}#g" template.xst > $@.xst
+	cd $(WORKDIR) && xst -ifn ../$@.xst -ofn $(PROJECT)-xst.log
+
+$(WORKDIR)/$(PROJECT)_6MB_rev_b.ngc:	$(PROJECT).v $(PROJECT).prj
+	@mkdir $(WORKDIR) || true
+	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(REV_B_DEFINES) Offer_6M}#g" template.xst > $@.xst
+	cd $(WORKDIR) && xst -ifn ../$@.xst -ofn $(PROJECT)-xst.log
+
 $(WORKDIR)/$(PROJECT)_cdtv_rev_a.ngc:	$(PROJECT).v $(PROJECT).prj
 	@mkdir $(WORKDIR) || true
 	@sed -r "s#^(-top).*#\1 $(PROJECT)#g;s#^(-ofn).*#\1 ..\/$@#g;s#^(-ifn).*#\1 ../$(PROJECT).prj#g;s#^(-define).*#\1 {$(REV_A_DEFINES) cdtv}#g" template.xst > $@.xst
