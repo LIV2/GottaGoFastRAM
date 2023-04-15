@@ -1,0 +1,26 @@
+name: Generate release files
+
+permissions:
+  contents: write
+on:
+  push:
+    tags:
+      - "Release_**"
+      - "Rev**"
+      - "Proto**"
+      - "proto**"
+  workflow_dispatch:
+
+jobs:
+  draft_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: |
+            Binaries/*.jed
