@@ -4,11 +4,10 @@ WORKDIR=tmp
 BINDIR=../Binaries
 CABLE=usb21
 SERIAL=$(shell git rev-parse --short=8 HEAD)
-PRODID=69
 
 CPLDFITFLAGS=-loc on -slew slow -init low -terminate keeper -nogclkopt -nogtsopt -nogsropt -power std -ignoretspec -optimize speed -keepio -inputs 54 -pterms 25
-REV_A_DEFINES=makedefines autoconfig rev_a SERIAL=32'h${SERIAL} PRODID=${PRODID}
-REV_B_DEFINES=makedefines autoconfig rev_b SERIAL=32'h${SERIAL} PRODID=${PRODID}
+REV_A_DEFINES=makedefines autoconfig rev_a SERIAL=32'h${SERIAL}
+REV_B_DEFINES=makedefines autoconfig rev_b SERIAL=32'h${SERIAL}
 
 .PHONY:	all clean
 

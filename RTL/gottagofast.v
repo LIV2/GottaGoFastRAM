@@ -20,7 +20,7 @@ Inspired by mkl's mem68k
 
 `ifndef makedefines // The defines ignored if being built by Makefile
 `define SERIAL 32'd421
-`define PRODID 8'69
+`define PRODID 8'1
 
 `define autoconfig  // If disabled RAM is always mapped to $200000-9FFFFF
 //`define cdtv      // Uncomment to build CDTV compatible version
@@ -62,8 +62,8 @@ reg [7:0] addr_match;
 
 `ifdef autoconfig
 // Autoconfig
-localparam [15:0] mfg_id  = 16'h07DB;
-localparam [7:0]  prod_id = `PRODID;
+localparam [15:0] mfg_id  = 16'd5194;
+localparam [7:0]  prod_id = 8'd1;
 localparam [31:0] serial = `SERIAL;
 
 wire autoconfig_cycle;
