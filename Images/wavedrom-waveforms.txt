@@ -24,7 +24,7 @@
   {name: 'ADDR', wave: 'xxx=......xx', period: 0.5, data: "Match"},
   {name: 'AS', wave: '1...0....1..', period:0.5},
   {name: 'DS', wave: '1.....0..1..', period:0.5},
-  {name: 'RW', wave: '1.0.........', period:0.5},
+  {name: 'RW', wave: '1...0.....1.', period:0.5},
   {name: 'BUFFER_OE', wave: '1.....0..1..', period:0.5},
   {name: 'WR', wave: '1.....0..1..', period:0.5},
   {name: 'DATA', wave: 'x....=....xx', period:0.5},
